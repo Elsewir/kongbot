@@ -12,7 +12,7 @@ var time;
 
 var responseList = [
     // MUHAMMED
-    ['muhammed', '(SAV).'],
+    ['muhammed', 'Muhammed yalancının tekiydi?'],
     ['muhammet', '(SAV).'],
 
     // KÜFÜRLER
@@ -26,26 +26,28 @@ var responseList = [
     ['yarak', 'Küfür etme adam ol.'],
     ['amcık', 'Küfür etme adam ol.'],
     ['amq', 'Küfür etme adam ol.'],
-    ['AMK', 'Küfür etme adam ol.'],  
     ['amk', 'Küfür etme adam ol.'],
     ['aq', 'Küfür etme adam ol.'],
-    ['oç', 'Ben senin annene küfrettimi orospu çocuğu.'],
+    ['oç', 'Küfür etme adam ol.'],
     ['orospu', 'Küfür etme adam ol.'],
     ['orosbu', 'Küfür etme adam ol.'],
+    ['gavat', 'Küfür etme adam ol.'],
 
     // ALLAH
-    ['allah', '(C.C)'],
-    ['Allah', '(C.C)'],
-    ['ALLAH', '(C.C)'],
-    ['tanrı', '(C.C)'],
-    ['Tanrı', '(C.C)'],
+    ['allah', 'Allah yok.'],
+    ['tanrı', 'Tanrı yok.'],
+    ['tanri', 'Tanrı yok.'],
     ['tekbir', 'ALLAHU EKBER'],
 ];
 
 // Bot'un mesajlarına cevap vermeyeceği kişiler
 var blackList = [
-    "fatihkutay"
+    "fatihkutay", "BrokenDiamond"
 ];
+
+// cevaplar room'a mı yoksa pm olarak mı atılacak test eden değişken
+// true ise cevaplar pm olarak yollanacak
+var replyPM = true;
 
 // Özel mesaj yollama fonksiyonu
 function sendPrivateMessage(senderName, message) {
@@ -66,7 +68,7 @@ function sendRoomMessage(message) {
         {
             "type": "room_message",
             "data": {
-                "message": message[i],
+                "message": message,
                 "room": 
                 {
                     "id": "15",
@@ -99,7 +101,7 @@ window.konduitToHolodeck = function (a) {
     // BOT'u kullanan kişinin nickname'i
     // ünlem işaretli komutları sadece bu kullanıcının kullanması için bu değişken tanımlandı
     // !afk gibi
-    var user = "KafirBOT"
+    var user = "KafirBOT";
 
     // verilecek cevap mesajlarının tutulduğu list
     var message = [];
@@ -112,9 +114,6 @@ window.konduitToHolodeck = function (a) {
 
     // mesajı atan kişi pm mi atmış test edilecek.
     var isPM = false;
-
-    // pm'lere cevap verilip verilmeyeceği ile alakalı değişken
-    var replyPM = true;
 
     try {
         try {
@@ -130,29 +129,36 @@ window.konduitToHolodeck = function (a) {
             error = true;
            
         // bot sahibine özel komutlar
-        if (parsed.data.message.indexOf('!afk') > -1 && senderName.indexOf(user) > -1)
+        if ((parsed.data.message.indexOf('!afk') > -1) && (senderName == user))
             afk = !afk;
-        if (parsed.data.message.indexOf('!deneme') > -1 && senderName.indexOf(user) > -1)
-            message.push("Deneme\n");
+        if ((parsed.data.message.indexOf('!deneme') > -1) && (senderName == user))
+            message.push('Deneme');
+        if ((parsed.data.message.indexOf('!pm-mode-on') > -1) && (senderName == user))
+            replyPM = true;
+        if ((parsed.data.message.indexOf('!pm-mode-off') > -1) && (senderName == user))
+            replyPM = false;
         //------------------------------
        
         //containsWord(parsed.data.message, responseList[i][0]
         for (var i = 0; i < responseList.length; i++) {
-            if (parsed.data.message == responseList[i][0] && !error) {
+            if (parsed.data.message.toLowerCase() == responseList[i][0] && !error) {
                 message.push(responseList[i][1] + "\n");
             }
         }
 
+        // mesaj yoksa bir şey yollamıyoruz
         if (message.length === 0)
             error = true;
 
-        if (!error && !afk) {     // && mods(parsed.data.user.senderName) == true
-            if (isPM && replyPM) { 
-                for (var i = 0; i < message.length; i++) 
-                    sendPrivateMessage(senderName, message[i]) 
+        if (!(error || afk)) {     // && mods(parsed.data.user.senderName) == true
+            if (isPM || replyPM) { 
+                for (var i = 0; i < message.length; i++) {
+                    sendPrivateMessage(senderName, message[i]);
+                }
             } else {
-                 for (var i = 0; i < message.length; i++)
-                    sendRoomMessage(message[i]) 
+                for (var i = 0; i < message.length; i++) {
+                    sendRoomMessage(message[i]);
+                }
             }
             console.log(message[i]);     
         }
