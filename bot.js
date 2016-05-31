@@ -15,19 +15,6 @@ var responseList = [
     ['muhammed', '(SAV).'],
     ['muhammet', '(SAV).'],
 
-    // Komutlar
-    ['!komutlar', '!bilgi,else,!anan,!kürt,!sözler,'],
-    ['!bilgi', 'KafirBOT versiyon 31.2.1'],
-    ['!sözler', '!mehmet akif,!mevlana,!nazım hikmet,!necip fazıl'],
-    ['!anan', 'https://i.ytimg.com/vi/Tb2FcQ0qaPY/maxresdefault.jpg'],  
-    ['!kürt', 'https://c11.incisozluk.com.tr/res/incisozluk/11006/1/199381_o66f9.jpg'], 
-
-    //SÖZLER 
-    ['!mehmet akif', 'Ya rab, bu uğursuz gecenin yok mu sabahı? Mahşerde mi biçarelerin, yoksa felahı?'],
-    ['!mevlana', 'Irmak suyunu tümden içmenin imkanı yok ama susuzluğu giderecek kadar içmemenin de imkanı yok.'],
-    ['!nazım hikmet', 'Ya ölü yıldızlara götüreceğiz hayatı, ya da ölüm inecek yeryüzüne.'], 
-    ['!necip fazıl', 'Dünya öküzün üstünde derler ama,ben dünya üzerinde nice öküzler bilrim.'], 
-
     // KÜFÜRLER
     ['göt', 'Küfür etme adam ol.'],
     ['sikerim', 'Küfür etme adam ol.'],
@@ -57,8 +44,41 @@ var responseList = [
 
 // Bot'un mesajlarına cevap vermeyeceği kişiler
 var blackList = [
-    "discontinue", "seksek1", "sterlars", "sahin9999", "omeragasxex", "AlpKaanB", "exandtrix09", "yagtinmer", "fatihkutay", "YusufO48", "MetehanO24"
+    "fatihkutay"
 ];
+
+// Özel mesaj yollama fonksiyonu
+function sendPrivateMessage(senderName, message) {
+    document.getElementById('konduit').dispatchJSONEvent(
+    JSON.stringify({
+        'type': 'private_message',
+        'data': {
+            'message': message,
+            'username': senderName,
+        }   
+    }));
+}
+
+// Room mesajı yollama fonksiyonu
+function sendRoomMessage(message) {
+    document.getElementById('konduit').dispatchJSONEvent(
+        JSON.stringify(
+        {
+            "type": "room_message",
+            "data": {
+                "message": message[i],
+                "room": 
+                {
+                    "id": "15",
+                    "type": "chat",
+                    "name": "Şu Çılgın Türkler",
+                    "xmpp_name": "15",
+                    "owner": "Tarantulka"
+                }
+            }
+        })
+    );  
+}
 
 // Opsiyonel özellikler için ses dosyası eklendi.
 var audio = document.createElement('audio'); // Ses dosyasını yarat.
@@ -74,7 +94,7 @@ window.konduitToHolodeck = function (a) {
     var parsed = JSON.parse(decoded);
 
     // mesajı atan kişinin kullanıcı adı bu.
-    var username = "";
+    var senderName = "";
 
     // BOT'u kullanan kişinin nickname'i
     // ünlem işaretli komutları sadece bu kullanıcının kullanması için bu değişken tanımlandı
@@ -94,59 +114,52 @@ window.konduitToHolodeck = function (a) {
     var isPM = false;
 
     // pm'lere cevap verilip verilmeyeceği ile alakalı değişken
-    var replyPM = false;
-
+    var replyPM = true;
 
     try {
         try {
-            username = parsed.data.user.username;
+            senderName = parsed.data.user.username;
             isPM = false;
         } catch (e) {
-            username = parsed.data.from;
+            senderName = parsed.data.from;
             isPM = true;
-    }
+        }
         
-    // kullanıcı banlanmış ise error
-    if (blackList.indexOf(username) > -1)
-        error = true;
+        // kullanıcı banlanmış ise error
+        if (blackList.indexOf(senderName) > -1)
+            error = true;
+           
+        // bot sahibine özel komutlar
+        if (parsed.data.message.indexOf('!afk') > -1 && senderName.indexOf(user) > -1)
+            afk = !afk;
+        if (parsed.data.message.indexOf('!deneme') > -1 && senderName.indexOf(user) > -1)
+            message.push("Deneme\n");
+        //------------------------------
        
-    // bot sahibine özel komutlar
-    if (parsed.data.message.indexOf('!afk') > -1 && username.indexOf(user) > -1)
-        afk = !afk;
-    //------------------------------
-   
-    //containsWord(parsed.data.message, responseList[i][0]
-    for (var i = 0; i < responseList.length; i++) {
-        if (parsed.data.message == responseList[i][0] && !error) {
-            message.push(responseList[i][1] + "\n");
+        //containsWord(parsed.data.message, responseList[i][0]
+        for (var i = 0; i < responseList.length; i++) {
+            if (parsed.data.message == responseList[i][0] && !error) {
+                message.push(responseList[i][1] + "\n");
+            }
         }
+
+        if (message.length === 0)
+            error = true;
+
+        if (!error && !afk) {     // && mods(parsed.data.user.senderName) == true
+            if (isPM && replyPM) { 
+                for (var i = 0; i < message.length; i++) 
+                    sendPrivateMessage(senderName, message[i]) 
+            } else {
+                 for (var i = 0; i < message.length; i++)
+                    sendRoomMessage(message[i]) 
+            }
+            console.log(message[i]);     
+        }
+    } 
+    catch (c) { 
+
     }
 
-    if (message.length === 0)
-        error = true;
-
-    if (!error && !afk) {     // && mods(parsed.data.user.username) == true
-        for (var i = 0; i < message.length; i++) {
-            console.log(message[i]);          
-            document.getElementById('konduit').dispatchJSONEvent(
-                JSON.stringify(
-                {
-                    "type": "room_message",
-                    "data": {
-                        "message": message[i],
-                        "room": 
-                        {
-                            "id": "15",
-                            "type": "chat",
-                            "name": "Şu Çılgın Türkler",
-                            "xmpp_name": "15",
-                            "owner": "Tarantulka"
-                        }
-                    }
-                })
-            );   
-        }
-    }
-  } catch (c) { }
-  old(a);
+    old(a);
 };
