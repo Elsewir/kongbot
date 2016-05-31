@@ -55,7 +55,7 @@ var responseList = [
     ['tekbir', 'ALLAHU EKBER'],
 ];
 
-// Bot'un mesajlarına cevap verdiği kişiler
+// Bot'un mesajlarına cevap vermeyeceği kişiler
 var blackList = [
     "discontinue", "seksek1", "sterlars", "sahin9999", "omeragasxex", "AlpKaanB", "exandtrix09", "yagtinmer", "fatihkutay", "YusufO48", "MetehanO24"
 ];
@@ -111,12 +111,8 @@ window.konduitToHolodeck = function (a) {
         error = true;
        
     // bot sahibine özel komutlar
-    if (parsed.data.message.indexOf('!afk') > -1)
+    if (parsed.data.message.indexOf('!afk') > -1 && username.indexOf(user) > -1)
         afk = !afk;
-    
-    if (username == parsed.data.from) 
-        error = true; 
-
     //------------------------------
    
     //containsWord(parsed.data.message, responseList[i][0]
