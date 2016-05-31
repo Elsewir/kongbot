@@ -17,9 +17,8 @@ var responseList = [
 
     // Komutlar
     ['!komutlar', '!bilgi,else,!anan,!kürt,!sözler,'],
-    ['!bilgi', 'ElseBOT versiyon 31.2.1'],
+    ['!bilgi', 'KafirBOT versiyon 31.2.1'],
     ['!sözler', '!mehmet akif,!mevlana,!nazım hikmet,!necip fazıl'],
-    ['else', 'Buyrun benim'],
     ['!anan', 'https://i.ytimg.com/vi/Tb2FcQ0qaPY/maxresdefault.jpg'],  
     ['!kürt', 'https://c11.incisozluk.com.tr/res/incisozluk/11006/1/199381_o66f9.jpg'], 
 
@@ -57,7 +56,7 @@ var responseList = [
 ];
 
 // Bot'un mesajlarına cevap verdiği kişiler
-var whiteList = [
+var blackList = [
     "discontinue", "seksek1", "sterlars", "sahin9999", "omeragasxex", "AlpKaanB", "exandtrix09", "yagtinmer", "fatihkutay", "YusufO48", "MetehanO24"
 ];
 
@@ -70,29 +69,55 @@ document.body.appendChild(audio);
 
 var old = window.konduitToHolodeck;
 window.konduitToHolodeck = function (a) {
+    // bu ikisi gelen mesajı parse ediyorlar
     var decoded = Base64.decode(a);
     var parsed = JSON.parse(decoded);
+
+    // mesajı atan kişinin kullanıcı adı bu.
     var username = "";
+
+    // BOT'u kullanan kişinin nickname'i
+    // ünlem işaretli komutları sadece bu kullanıcının kullanması için bu değişken tanımlandı
+    // !afk gibi
+    var user = "KafirBOT"
+
+    // verilecek cevap mesajlarının tutulduğu list
     var message = [];
+
+    // sorun çıkarsa bu değer true yapılacak
     var error = false;
 
     // Alınan veriyi konsola yazdır (Tarayıcıdayken F12 basıp görüntüleniyor)
     console.log(parsed.data);
 
+    // mesajı atan kişi pm mi atmış test edilecek.
+    var isPM = false;
+
+    // pm'lere cevap verilip verilmeyeceği ile alakalı değişken
+    var replyPM = false;
+
+
     try {
         try {
             username = parsed.data.user.username;
+            isPM = false;
         } catch (e) {
             username = parsed.data.from;
+            isPM = true;
     }
         
-    if (whiteList.indexOf(username) > -1)
+    // kullanıcı banlanmış ise error
+    if (blackList.indexOf(username) > -1)
         error = true;
        
-    if (parsed.data.message.indexOf('kapanın ben imamım') > -1)
+    // bot sahibine özel komutlar
+    if (parsed.data.message.indexOf('!afk') > -1)
         afk = !afk;
     
-    if (username == parsed.data.from) error = true; 
+    if (username == parsed.data.from) 
+        error = true; 
+
+    //------------------------------
    
     //containsWord(parsed.data.message, responseList[i][0]
     for (var i = 0; i < responseList.length; i++) {
