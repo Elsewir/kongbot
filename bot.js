@@ -13,7 +13,12 @@ var time;
 var responseList = [
     // MUHAMMED
     ['muhammed', 'Muhammed yalancının tekiydi?'],
-    ['muhammet', '(SAV).'],
+    ['muhammet', 'Muhammed yalancının tekiydi?'],
+    ['peygamber', 'Peygamberlerin hepsi şizofreni hastası biliyor musun? Hepsi yalancı.'],
+
+    // KURAN
+    ['kuran', 'İşe yaramaz yalanlarla dolu bir kağıt parçası.'],
+    ['kur\'an', 'İşe yaramaz yalanlarla dolu bir kağıt parçası.'],
 
     // KÜFÜRLER
     ['göt', 'Küfür etme adam ol.'],
@@ -31,13 +36,15 @@ var responseList = [
     ['oç', 'Küfür etme adam ol.'],
     ['orospu', 'Küfür etme adam ol.'],
     ['orosbu', 'Küfür etme adam ol.'],
-    ['gavat', 'Küfür etme adam ol.'],
+    ['gavat', 'Küfür etme adam ol.'],   
+    ['piç', 'Küfür etme adam ol.'],
+    ['puşt', 'Küfür etme adam ol.'],
 
     // ALLAH
     ['allah', 'Allah yok.'],
     ['tanrı', 'Tanrı yok.'],
     ['tanri', 'Tanrı yok.'],
-    ['tekbir', 'ALLAHU EKBER'],
+    ['tekbir', 'THERE\'S NO GOD'],
 ];
 
 // Bot'un mesajlarına cevap vermeyeceği kişiler
@@ -139,7 +146,7 @@ window.konduitToHolodeck = function (a) {
             replyPM = false;
         //------------------------------
        
-        //containsWord(parsed.data.message, responseList[i][0]
+        // mesajı analiz edip ona göre cevapları message listesine yaz.
         for (var i = 0; i < responseList.length; i++) {
             if (parsed.data.message.toLowerCase() == responseList[i][0] && !error) {
                 message.push(responseList[i][1] + "\n");
@@ -150,7 +157,8 @@ window.konduitToHolodeck = function (a) {
         if (message.length === 0)
             error = true;
 
-        if (!(error || afk)) {     // && mods(parsed.data.user.senderName) == true
+        // mesajı yolla
+        if (!(error || afk)) {
             if (isPM || replyPM) { 
                 for (var i = 0; i < message.length; i++) {
                     sendPrivateMessage(senderName, message[i]);
